@@ -140,7 +140,6 @@
                                                                         </div>
                                                                     </div>
 
-
 {{--
                                                                     <div class="col-md-12">
                                                                         <div class="reply-border">
@@ -154,16 +153,6 @@
 
                                                                         </div>
                                                                     </div> --}}
-
-
-
-
-
-
-
-
-
-
 
 
 

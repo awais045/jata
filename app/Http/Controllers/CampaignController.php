@@ -49,13 +49,17 @@ class CampaignController extends Controller
             'name' => 'required|string|max:255',
             'campaign_name' => 'required|string|max:255',
             'campaign_time' => 'required|string|max:255',
-            'campaign_type' => 'required|string|max:255',
+            // 'campaign_type' => 'required|string|max:255',
             'social_type' => 'required|string|max:255',
             'fil' => 'nullable|string',
-            'campaign' => 'required|string|max:255',
+            // 'campaign' => 'required|string|max:255',
+            'file' => 'required|file|mimes:jpeg,png,gif,mp4|max:10240', // Adjust max file size as needed (in KB)
         ]);
 
-        Campaign::create($request->all());
+        $newRecord = Campaign::create($request->all());
+        $campaign_id = $newRecord->id;
+        $this->saveUploadVideOrImage($request , $campaign_id);
+
         return back()
             ->with('success', 'Campaign has been created successfully.');
         // ->with('image', $imageName);
@@ -106,11 +110,11 @@ class CampaignController extends Controller
         $campaign = Campaign::find($campaign_id);
         return view('users.campaigns.media_upload', compact('campaign','campaign_id'));
     }
-    public function saveUploadVideOrImage( Request $request , string $campaign_id)
+    public function saveUploadVideOrImage( $request , string $campaign_id)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,gif,mp4|max:10240', // Adjust max file size as needed (in KB)
-        ]);
+        // $request->validate([
+        //     'file' => 'required|file|mimes:jpeg,png,gif,mp4|max:10240', // Adjust max file size as needed (in KB)
+        // ]);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -120,14 +124,17 @@ class CampaignController extends Controller
             $file->move(public_path('uploads'), $fileName);
             $filePath = url('uploads/' . $fileName);
         }
-
+        Campaign::where('id' , $campaign_id)->update([
+            'image'=> $filePath
+        ]);
         $fb = new Facebook(config('facebook'));
         $accessToken = env('ACCESS_TOKEN');
         $imageData = [
             // 'source' => $filePath,
             // 'url' => 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU',
-            'url' => url('uploads/').$fileName,
-            'caption' => $request->details,
+            // 'url' => url('uploads/').$fileName,
+            'url' =>$filePath,
+            'caption' => $request->campaign_name,
         ];
         $page_id = env('PAGE_ID');
         try {
@@ -151,7 +158,7 @@ class CampaignController extends Controller
                     'post_id'=>$postId,
                     'graph_node_id'=>$graph_node_id,
                     'image'=>$filePath,
-                    'details'=>$request->details,
+                    'details'=>$request->campaign_name,
                     'extension'=>$extension,
                     'campaign_id'=>$campaign_id,
                     'created_at'=>date('Y-m-d H:i:s'),
@@ -173,35 +180,38 @@ class CampaignController extends Controller
             if(in_array($extension , $videoExtensions)){
                 // Upload video
                 $data = [
-                    'title' =>  $request->details,
-                    'description' =>  $request->details,
+                    'title' =>  $request->campaign_name,
+                    'description' =>  $request->campaign_name,
                     'source' => $fb->videoToUpload('uploads/'.$fileName),
                 ];
                 $response = $fb->post($page_id.'/videos', $data, $accessToken);
                 $videoId = $response->getGraphNode()['id'];
 
-                echo 'Video uploaded. ID: ' . $videoId;
+                // echo 'Video uploaded. ID: ' . $videoId;
                 FaceBookPost::insert([
                     'user_id'=> Auth::user()->id,
                     'post_id'=>$videoId,
                     'graph_node_id'=>$videoId,
                     'image'=>$fileName,
-                    'details'=>$request->details,
+                    'details'=>$request->campaign_name,
                     'extension'=>$extension,
                     'campaign_id'=>$campaign_id,
                     'created_at'=>date('Y-m-d H:i:s'),
                 ]);
             }
-
-            return back()->with('success', 'Post has been Uploaded successfully.');
+            return true;
+            // return back()->with('success', 'Post has been Uploaded successfully.');
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            dd($e);
             // Graph API returned an error
             return response()->json(['error' => 'Graph API error: ' . $e->getMessage()], 500);
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
             // SDK returned an error
+            dd($e);
             return response()->json(['error' => 'Facebook SDK error: ' . $e->getMessage()], 500);
         }catch (\Exception $e) {
             // Other unexpected errors
+            dd($e);
             return response()->json(['error' => 'Unexpected error: ' . $e . $e->getLine()], 500);
         }
     }

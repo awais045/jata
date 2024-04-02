@@ -222,7 +222,8 @@
                                                 <td class="heading pt-3">{{$campaign->campaign_name}}</td>
                                                 <td class="heading pt-3">{{$campaign->campaign_time}}</td>
                                                 <td class="heading "><a
-                                                       href="{{url('campaigns/upload_media/' . $campaign->id)}}" class="btn btn-info text-light rounded-pill">{{$campaign->campaign_type}}</a>
+                                                    // {{url(campaigns/upload_media/$campaign->id)}}
+                                                       href="#" class="btn btn-info text-light rounded-pill">{{$campaign->campaign_type}}</a>
                                                 </td>
                                                 <td class="heading1 pt-3">{{$campaign->social_type}}</td>
                                                 <td class="heading1 pt-3">{{$campaign->social_type}}</td>
