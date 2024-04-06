@@ -130,14 +130,46 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-12">
-                                                                        <div class="form-group">
-                                                                            <label for="products">Products:</label>
-                                                                            <select name="products[]" id="products" class="form-con trol select2" multiple>
-                                                                                @foreach ($products as $product)
-                                                                                    <option value="{{ $product->id }}" {{ in_array($product->id, $assignedProductIds) ? 'selected' : '' }}>{{ $product->name }}</option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
+
+
+                                                           <div class="row mt-3">
+                                                            <div class="col-md-12 col-lg-12 col-xl-12 table-responsive">
+                                                                                                        <table class="table table-success" style="border: 1px solid #2E32381F;border-radius: 16px;">
+                                                                    <thead>
+                                                                        <tr>
+                                                                           <th scope="col" class=" t-heading">Select</th>
+                                                                            <th scope="col" class=" t-heading">Produktnavn</th>
+                                                                            <th scope="col" class=" t-heading ">Pris</th>
+                                                                            <th scope="col" class=" t-heading">Søgeord</th>
+                                                                            <th scope="col" class=" t-heading">Lager</th>
+
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach ($products as $product)
+
+                                                                        <tr>
+                                                                            <th scope="row">
+                                                                                <div class="form-check main_form">
+                                                                                    <input class="form-check-input" type="checkbox"  name="products[]" value="{{$product->id}}" {{ in_array($product->id, $assignedProductIds) ? 'checked' : '' }}>
+                                                                                    <label class="form-check-label" for="defaultCheck1">
+                                                                                    </label>
+                                                                                </div>
+                                                                            </th>
+                                                                            <td class="heading ">{{$product->name}}</td>
+                                                                            <td class="heading " >
+                                                                                $412.50</td>
+                                                                            <td class="heading ">{{$product->product_information}}</td>
+                                                                            <td class="heading ">{{$product->price}}</td>
+
+
+                                                                        </tr>
+                                                                        @endforeach
+
+                                                                    </tbody>
+                                                                </table>
+                                                                                       </div></div>
+
                                                                     </div>
 
 {{--

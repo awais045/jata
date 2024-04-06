@@ -216,4 +216,10 @@ class CampaignController extends Controller
         }
     }
 
+    private function getCatalogProducts( $cataLogId ) {
+
+    }
+
+
+
 }

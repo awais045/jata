@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FacebookLoginController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\ProductCatalogController;
 use Iman\Streamer\VideoStreamer;
 
 Route::get('/homee', function () {
@@ -277,5 +278,9 @@ Route::middleware('auth.redirect')->group(function () {
 
     Route::get('campaigns/assign/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'showModal'])->name('assignment.showModal');
     Route::post('assign/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'assign'])->name('assignment.assign');
+
+    // Route::get('addCataLog', ['App\Http\Controllers\ProductCatalogController', 'index'])->name('catalog.index');
+    // Route::get('getBatches', ['App\Http\Controllers\ProductCatalogController', 'getBatches'])->name('catalog.getBatches');
+    // Route::get('getBatchesProducts', ['App\Http\Controllers\ProductCatalogController', 'getBatchesProducts'])->name('catalog.getBatchesProducts');
 });
 
