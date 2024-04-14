@@ -85,10 +85,11 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form action="{{ url('assign/'.$campaign_id) }}" method="post"
+                                    <form action="{{ url('assign/' . $campaign_id) }}" method="post"
                                         enctype="multipart/form-data">
                                         @csrf
-                                        <input type="hidden" name="user_id" id="user_id" value="{{\Auth::user()->id}} ">
+                                        <input type="hidden" name="user_id" id="user_id"
+                                            value="{{ \Auth::user()->id }} ">
                                         <div class="tab-content pt-5" id="tab-content">
                                             <div class="tab-pane active" id="fill-tabpanel-0" role="tabpanel"
                                                 aria-labelledby="fill-tab-0">
@@ -106,73 +107,100 @@
                                                                         <div class="reply-border">
                                                                             <label for="">Navn</label>
                                                                             <input type="text" class="form-control Ty pe"
-                                                                                name="name" value="{{ $campaign->name }}" disabled
-                                                                                placeholder="Name...">
+                                                                                name="name" value="{{ $campaign->name }}"
+                                                                                disabled placeholder="Name...">
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-4">
                                                                         <div class="reply-border">
-                                                                            <label for="">Kampagne Navn	</label>
+                                                                            <label for="">Kampagne Navn </label>
                                                                             <input type="text" class="form-control Ty pe"
                                                                                 name="campaign_name"
-                                                                                value="{{ $campaign->campaign_name }}" disabled
-                                                                                placeholder="Campaign Name...">
+                                                                                value="{{ $campaign->campaign_name }}"
+                                                                                disabled placeholder="Campaign Name...">
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-4">
                                                                         <div class="reply-border">
                                                                             <label for="">Kampagnetidspunkt</label>
-                                                                            <input type="text" class="form-control Ty pe" disabled
-                                                                                name="campaign_time" value="{{ $campaign->campaign_time }}"
+                                                                            <input type="text" class="form-control Ty pe"
+                                                                                disabled name="campaign_time"
+                                                                                value="{{ $campaign->campaign_time }}"
                                                                                 placeholder="Kampagnetidspunkt...">
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-12">
 
 
-                                                           <div class="row mt-3">
-                                                            <div class="col-md-12 col-lg-12 col-xl-12 table-responsive">
-                                                                                                        <table class="table table-success" style="border: 1px solid #2E32381F;border-radius: 16px;">
-                                                                    <thead>
-                                                                        <tr>
-                                                                           <th scope="col" class=" t-heading">Select</th>
-                                                                            <th scope="col" class=" t-heading">Produktnavn</th>
-                                                                            <th scope="col" class=" t-heading ">Pris</th>
-                                                                            <th scope="col" class=" t-heading">Søgeord</th>
-                                                                            <th scope="col" class=" t-heading">Lager</th>
+                                                                        <div class="row mt-3">
+                                                                            <div
+                                                                                class="col-md-12 col-lg-12 col-xl-12 table-responsive">
+                                                                                <table class="table table-success"
+                                                                                    style="border: 1px solid #2E32381F;border-radius: 16px;">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th scope="col"
+                                                                                                class=" t-heading">Select
+                                                                                            </th>
+                                                                                            <th scope="col"
+                                                                                                class=" t-heading">
+                                                                                                Produktnavn</th>
+                                                                                            <th scope="col"
+                                                                                                class=" t-heading ">Pris
+                                                                                            </th>
+                                                                                            <th scope="col"
+                                                                                                class=" t-heading">Søgeord
+                                                                                            </th>
+                                                                                            <th scope="col"
+                                                                                                class=" t-heading">Lager
+                                                                                            </th>
 
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        @foreach ($products as $product)
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        @foreach ($products as $product)
+                                                                                            <tr>
+                                                                                                <th scope="row">
+                                                                                                    <div
+                                                                                                        class="form-check main_form">
+                                                                                                        <input
+                                                                                                            class="form-check-input"
+                                                                                                            type="checkbox"
+                                                                                                            name="products[]"
+                                                                                                            value="{{ $product->id }}"
+                                                                                                            {{ in_array($product->id, $assignedProductIds) ? 'checked' : '' }}>
+                                                                                                        <label
+                                                                                                            class="form-check-label"
+                                                                                                            for="defaultCheck1">
+                                                                                                        </label>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                <td class="heading ">
+                                                                                                    {{ $product->name }}
+                                                                                                </td>
+                                                                                                <td class="heading ">
+                                                                                                    $412.50</td>
+                                                                                                <td class="heading ">
+                                                                                                    {{ $product->product_information }}
+                                                                                                </td>
+                                                                                                <td class="heading ">
+                                                                                                    {{ $product->price }}
+                                                                                                </td>
 
-                                                                        <tr>
-                                                                            <th scope="row">
-                                                                                <div class="form-check main_form">
-                                                                                    <input class="form-check-input" type="checkbox"  name="products[]" value="{{$product->id}}" {{ in_array($product->id, $assignedProductIds) ? 'checked' : '' }}>
-                                                                                    <label class="form-check-label" for="defaultCheck1">
-                                                                                    </label>
-                                                                                </div>
-                                                                            </th>
-                                                                            <td class="heading ">{{$product->name}}</td>
-                                                                            <td class="heading " >
-                                                                                $412.50</td>
-                                                                            <td class="heading ">{{$product->product_information}}</td>
-                                                                            <td class="heading ">{{$product->price}}</td>
 
+                                                                                            </tr>
+                                                                                        @endforeach
 
-                                                                        </tr>
-                                                                        @endforeach
-
-                                                                    </tbody>
-                                                                </table>
-                                                                                       </div></div>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        </div>
 
                                                                     </div>
 
-{{--
+                                                                    {{--
                                                                     <div class="col-md-12">
                                                                         <div class="reply-border">
                                                                             <label for="">Products</label>
@@ -218,7 +246,6 @@
     @endsection
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
         $(document).ready(function() {
 
         });

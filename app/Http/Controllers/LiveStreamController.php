@@ -202,8 +202,7 @@ class LiveStreamController extends Controller
         }
     }
 
-
-    function getCommentReply()
+    public function getCommentReply()
     {
 
         $fb = new Facebook(config('facebook'));
@@ -423,7 +422,7 @@ class LiveStreamController extends Controller
         // Process response as needed
     }
 
-    function createProduct()
+    public function createProduct()
     {
         $api = Api::init(env('FACEBOOK_APP_ID'), env('FACEBOOK_APP_SECRET'), $this->accessToken);
         $catalogId = 3701091503438786;

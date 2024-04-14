@@ -17,6 +17,23 @@ class Campaign extends Model
         'social_type',
         'fil',
         'campaign',
-        'user_id'
+        'user_id',
+        'catalog_id'
     ];
+
+    public function facebookPost()
+    {
+        return $this->hasOne(FaceBookPost::class);
+    }
+    public function post()
+    {
+        return $this->hasOne(FaceBookPost::class);
+    }
+    public function productAssign(){
+        return $this->hasMany(CampaignProductAssignment::class);
+    }
+    public function comments(){
+        return $this->hasMany(FaceBookPostComments::class);
+    }
+
 }

@@ -152,7 +152,7 @@
                     <div class="col-md-8">
                         <div class="row live">
                             <div class="col-md-4">
-                                <a href="" class="btn btn-primary mt-3 w-100"><i class="fa fa-video"
+                                <a href="{{url("campaigns/post-live-video")}}" class="btn btn-primary mt-3 w-100"><i class="fa fa-video"
                                         style="color:black;"></i>Live salg</a>
                             </div>
                             <div class="col-md-4">
@@ -206,15 +206,13 @@
                                             <th scope="col" class=" t-heading">Kampagnetidspunkt</th>
                                             <th scope="col" class=" t-heading"> Kampagnetype</th>
                                             <th scope="col" class=" t-heading">Social Type</th>
-                                            <th scope="col" class=" t-heading">Fil</th>
-                                            <th scope="col" class=" t-heading">Kampagne</th>
                                             <th scope="col" class=" t-heading">Product Assignment</th>
+                                            <th scope="col" class=" t-heading">View</th>
                                             <th scope="col" class=" t-heading">Svar</th>
                                             <th scope="co" class=" t-heading">...</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-
                                         @foreach ($campaigns as $campaign)
                                             <tr>
                                                 <th scope="row" class="pt-3">{{$campaign->id}}</th>
@@ -222,10 +220,9 @@
                                                 <td class="heading pt-3">{{$campaign->campaign_name}}</td>
                                                 <td class="heading pt-3">{{$campaign->campaign_time}}</td>
                                                 <td class="heading "><a
-                                                       href="#" class="btn btn-info text-light rounded-pill">{{$campaign->campaign_type}}</a>
+                                                       href="#" class="btn btn-info text-light rounded-pill">{{$campaign->social_type}}</a>
                                                 </td>
-                                                <td class="heading1 pt-3">{{$campaign->social_type}}</td>
-                                                <td class="heading1 pt-3">{{$campaign->social_type}}</td>
+
                                                 <td class="heading pt-3"><img src="user/image/print.png"
                                                         style="width: 20px;">
                                                 </td>
@@ -233,6 +230,14 @@
                                                     <a
                                                         href="{{ url('campaigns/assign/' . $campaign->id ) }}">
                                                         <i class="fa fa-edit" style="color:#2E32387A;"></i>
+
+                                                    </a>
+
+                                                </td>
+                                                <td>
+                                                    <a
+                                                        href="{{ url('campaigns/' . $campaign->id ) }}">
+                                                        <i class="fa fa-eye" style="color:#2E32387A;"></i>
 
                                                     </a>
 

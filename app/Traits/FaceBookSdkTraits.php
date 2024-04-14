@@ -23,88 +23,106 @@ use FacebookAds\Object\Fields\ProductFeedFields;
 use FacebookAds\Object\Fields\ProductFeedScheduleFields;
 use FacebookAds\Logger\CurlLogger;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Artisan;
 
 trait FaceBookSdkTraits
 {
-    // public function init()
-    // {
-    //     $this->fb = new Facebook(config('facebook'));
-    //     $this->accessToken = env('ACCESS_TOKEN');
-    //     $this->businessId = env('BUSINESS_ID');
-    //     $this->pageID = env('PAGE_ID');
-    // }
+    function getLongLiveToken()
+    {
+        try {
+            // Exchange the short-lived token for a long-lived token
+            $oauth_response = $this->fb->getOAuth2Client()->getLongLivedAccessToken('EAAUpognFdwcBO7ZCPvQwAKQQHpzNXXdK0hA7ZAuw3JroYk0I8qMqwX7IWV3yTArsmDkgrA9KtRnk7Sxs3S1caiubRz0dSXrZCotLrKZA1jWpO59kkmWX0mcyVwGm9qrvHCoZA0qfg35RP5IsRsxmXywQEShMT6mV41lZABLJdjglBRM9SPGDVJTHEcZCi3aM6MIWv1TTmAx2MHdaWkzatThuzRQeVZBdA1V4z7FXrLoZD');
+            $long_lived_token = $oauth_response->getValue();
+            return $long_lived_token;
+            // Output the long-lived token
+            echo 'Long-lived access token: ' . $long_lived_token;
+        } catch (FacebookResponseException $e) {
+            dd($e);
+            // API call failed
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (FacebookSDKException $e) {
+            dd($e);
+            // SDK error occurred
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+        die();
+    }
+    public function createCataLog($campaign, $businessId, $accessToken)
+    {
+        try {
+            $api = Api::init(env('FACEBOOK_APP_ID'), env('FACEBOOK_APP_SECRET'), $accessToken);
+            $api->setLogger(new CurlLogger());
+            $catalog = new ProductCatalog(null, $businessId);
+            $catalog->setData(array(
+                ProductCatalogFields::NAME => $campaign->campaign_name
+            ));
+            $catalog->create();
+            $productCatalogId = $catalog->{ProductCatalogFields::ID};
+            return $productCatalogId;
+        } catch (FacebookResponseException $e) {
+            dd($e);
+            // API call failed
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (FacebookSDKException $e) {
+            dd($e);
+            // SDK error occurred
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+    }
 
-    public function createFBProductForCatalogId( $productData , $cataLogId , $userId , $fbObject , $accessToken )
+    public function createFBProductForCatalogId($productData, $cataLogId, $userId, $fbObject, $accessToken)
     {
         $api = Api::init(env('FACEBOOK_APP_ID'), env('FACEBOOK_APP_SECRET'), $accessToken);
         $api = Api::instance();
-        $catLogId = 3701091503438786;
 
         $api = Api::init(env('FACEBOOK_APP_ID'), env('FACEBOOK_APP_SECRET'), $accessToken);
         $api->setLogger(new CurlLogger());
 
         $fields = array();
-        // $data[] = array(
-        //     'method' => 'CREATE',
-        //     'retailer_id' => 'retailer-045',
-        //     'data' => array(
-        //         "availability" => "in stock",
-        //         "brand" => "Nike",
-        //         "category" => "t-shirts-1",
-        //         "description" => "dlad ads product description",
-        //         "image_url" => "http://www.images.example.com/t-shirts/1.png",
-        //         "name" => "ALksf product name",
-        //         "price" => "500", //it will be 1000 otherwise it will through error
-        //         "currency" => "INR",
-        //         "condition" => "new",
-        //         "url" => "http://www.images.example.com/t-shirts/5.png",
-        //         "retailer_product_group_id" => "product-group-8"
-        //     )
-        // );
+
         $data[] = array(
-        'method' => 'CREATE',
-        'retailer_id' => 'retailer-'.$productData->id.'_'.time(),
-        'data' => array(
-            "availability" => "in stock",
-            "brand" => "JataBrand",
-            "category" => "Default-".$productData->name,
-            "description" => $productData->product_information,
-            "image_url" => str_replace('public/public','public/storage',asset($productData->image)),
-            "name" => $productData->name,
-            "price" => (int)$productData->price,
-            "currency" => "USD",
-            "condition" => "new",
-            "url" => $productData->url,
-            "retailer_product_group_id" => "product-group-".$productData->id.'_'.time()
-        )
+            'method' => 'CREATE',
+            'retailer_id' => 'retailer-' . $productData->id . '_' . time(),
+            'data' => array(
+                "availability" => "in stock",
+                "brand" => "JataBrand",
+                "category" => "Defaultk" . $productData->name,
+                "description" => $productData->product_information,
+                "image_url" => str_replace('public/public', 'public/storage', asset($productData->image)),
+                "name" => $productData->name,
+                "price" => (int)$productData->price,
+                "currency" => "USD",
+                "condition" => "new",
+                "url" => $productData->url,
+                "retailer_product_group_id" => "product-group-" . $productData->id . '_' . time()
+            )
         );
         $params = array(
             'access_token' => $accessToken,
             'requests' => $data
         );
-        return json_encode((new ProductCatalog($catLogId))->createBatch(
+        return json_encode((new ProductCatalog($cataLogId))->createBatch(
             $fields,
             $params
         )->exportAllData(), JSON_PRETTY_PRINT);
         exit;
     }
 
-    public function getBatches()
+    public function getBatches($fbObject, $accessToken)
     {
-        return $this->fb;
         // Get Page posts
-        $response = $this->fb->get($this->businessId . "/owned_product_catalogs", $this->accessToken);
+        $response = $fbObject->get($this->businessId . "/owned_product_catalogs", $accessToken);
         $posts = $response->getDecodedBody()['data'];
         return $posts;
     }
 
-    public function getBatchesProducts()
+    public function getBatchesProducts($fbObject, $accessToken, $batchId)
     {
-        $this->fb->setDefaultAccessToken($this->accessToken);
+        $fbObject->setDefaultAccessToken($accessToken);
 
         try {
             // Make the API call to retrieve batches of products
-            $response = $this->fb->get('/3701091503438786/products', $this->accessToken);
+            $response = $fbObject->get('/'.$batchId.'/products', $accessToken);
             $graphEdge = $response->getGraphEdge();
             // Process the products
             $arrayProduct = [];
@@ -121,4 +139,63 @@ trait FaceBookSdkTraits
         }
     }
 
+    public function getPosts($fbObject, $accessToken, $pageId)
+    {
+        try {
+            $response = $fbObject->get("/" . $pageId . "/posts?fields=id,message,attachments,created_time,from", $accessToken);
+            $posts = $response->getDecodedBody()['data'];
+            return $posts;
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+    }
+    public function getComments($fbObject, $accessToken, $postId)
+    {
+        try {
+            $response = $fbObject->get("/" . $postId . "/comments?fields=id,message,attachment,created_time,from", $accessToken);
+            $posts = $response->getDecodedBody()['data'];
+            return $posts;
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+    }
+
+    public function replyToComment( $fbObject, $accessToken , $postId , $commentId , $senderId , $pageId)
+    {
+        // $response = $this->fb->post(
+        //     '/'.$commentId.'/comments',
+        //     array('message' => 'Thanks for your time please check your inbox.')
+        //   , $accessToken);
+
+        //   $graphNode = $response->getGraphNode();
+        //   echo 'Reply ID: ' . $graphNode['id'];
+
+          $fbObject->setDefaultAccessToken($accessToken);
+        try {
+            if($senderId){
+                $message = "Your reply message here Inbox here.";
+                // Send a message to the sender's inbox
+                $response = $fbObject->post("/".$pageId."/messages",
+                array('recipient' => ['comment_id'=>$postId , 'post_id'=>$commentId],'message' => $message ),
+                $accessToken);
+
+                // Check if the message was sent successfully
+                $message_id = $response->getGraphNode()->getField('message_id');
+                if ($message_id) {
+                    echo "Message sent successfully!";
+                } else {
+                    echo "Failed to send message.";
+                }
+            }
+
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+    }
 }

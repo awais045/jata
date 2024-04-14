@@ -5,6 +5,7 @@ use App\Http\Controllers\FacebookLoginController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\ProductCatalogController;
+use App\Http\Controllers\CommentReplyWebhookController;
 use Iman\Streamer\VideoStreamer;
 
 Route::get('/homee', function () {
@@ -265,8 +266,14 @@ Route::middleware('auth')->group(function () {
 
 });
 
+Route::post('webhook_comment_reply', 'CommentReplyWebhookController@handleWebhook');
+
+
 Route::middleware('auth.redirect')->group(function () {
     // Routes that require authentication
+
+    Route::get('campaigns/post-live-video', ['App\Http\Controllers\CampaignController', 'liveVideoCreate'])->name('campaigns.liveVideoCreate');
+    Route::post('campaigns/post-live-video-post', ['App\Http\Controllers\CampaignController', 'liveVideoStreamWithCataLog'])->name('campaigns.liveVideoStreamWithCataLog');
 
     Route::get('post-templates', ['App\Http\Controllers\CampaignController', 'postListing'])->name('campaigns.postListing');
     Route::get('campaigns/upload_media/{campaign_id}', ['App\Http\Controllers\CampaignController', 'uploadVideOrImage'])->name('assignment.uploadVideOrImage');
@@ -278,6 +285,8 @@ Route::middleware('auth.redirect')->group(function () {
 
     Route::get('campaigns/assign/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'showModal'])->name('assignment.showModal');
     Route::post('assign/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'assign'])->name('assignment.assign');
+
+    Route::get('run_cmd/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'runArtisanCommand'])->name('assignment.runArtisanCommand');
 
     // Route::get('addCataLog', ['App\Http\Controllers\ProductCatalogController', 'index'])->name('catalog.index');
     // Route::get('getBatches', ['App\Http\Controllers\ProductCatalogController', 'getBatches'])->name('catalog.getBatches');

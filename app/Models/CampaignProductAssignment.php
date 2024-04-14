@@ -10,4 +10,12 @@ class CampaignProductAssignment extends Model
 {
     use HasFactory,SoftDeletes;
     protected $fillable = ['user_id', 'product_id', 'campaign_id'];
+
+    public function campaign(){
+        return $this->belongsTo(Campaign::class);
+    }
+
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
 }
