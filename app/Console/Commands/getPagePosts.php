@@ -53,7 +53,6 @@ class getPagePosts extends Command
         $posts = $this->getPosts($this->fbNew, $this->accessToken, $this->pageID);
         if ($posts) {
             foreach ($posts as $post) {
-
                 $media_url ='';
                 $attachments = isset($post['attachments']) ? $post['attachments'] : null;
                 if (isset($post['attachments'])) {
@@ -72,8 +71,8 @@ class getPagePosts extends Command
                 }
                 $arrayToSaveOrUpdate = [
                     'user_id' => 2,
-                    'post_id' => $post['attachments']['data'][0]['target']['id'],
-                    'campaign_id' => 16,
+                    // 'post_id' => $post['attachments']['data'][0]['target']['id'],
+                    // 'campaign_id' => 16,
                     'details' =>$title ,
                     'live_image_url'=>$media_url,
                     'post_url' =>$post['attachments']['data'][0]['url'],

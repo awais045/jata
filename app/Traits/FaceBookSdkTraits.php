@@ -27,24 +27,25 @@ use Illuminate\Support\Facades\Artisan;
 
 trait FaceBookSdkTraits
 {
-    function getLongLiveToken()
+    function getLongLiveToken($shortToken)
     {
+        // if(empty($shortToken)){
+        //     $shortToken ='EAAUpognFdwcBO7ZCPvQwAKQQHpzNXXdK0hA7ZAuw3JroYk0I8qMqwX7IWV3yTArsmDkgrA9KtRnk7Sxs3S1caiubRz0dSXrZCotLrKZA1jWpO59kkmWX0mcyVwGm9qrvHCoZA0qfg35RP5IsRsxmXywQEShMT6mV41lZABLJdjglBRM9SPGDVJTHEcZCi3aM6MIWv1TTmAx2MHdaWkzatThuzRQeVZBdA1V4z7FXrLoZD';
+        // }
         try {
             // Exchange the short-lived token for a long-lived token
-            $oauth_response = $this->fb->getOAuth2Client()->getLongLivedAccessToken('EAAUpognFdwcBO7ZCPvQwAKQQHpzNXXdK0hA7ZAuw3JroYk0I8qMqwX7IWV3yTArsmDkgrA9KtRnk7Sxs3S1caiubRz0dSXrZCotLrKZA1jWpO59kkmWX0mcyVwGm9qrvHCoZA0qfg35RP5IsRsxmXywQEShMT6mV41lZABLJdjglBRM9SPGDVJTHEcZCi3aM6MIWv1TTmAx2MHdaWkzatThuzRQeVZBdA1V4z7FXrLoZD');
+            $oauth_response = $this->fb->getOAuth2Client()->getLongLivedAccessToken($shortToken);
             $long_lived_token = $oauth_response->getValue();
             return $long_lived_token;
-            // Output the long-lived token
-            echo 'Long-lived access token: ' . $long_lived_token;
+            // echo 'Long-lived access token: ' . $long_lived_token;
         } catch (FacebookResponseException $e) {
-            dd($e);
-            // API call failed
-            echo 'Graph returned an error: ' . $e->getMessage();
+            return false;
+            //dd($e); // API call failed echo 'Graph returned an error: ' . $e->getMessage();
         } catch (FacebookSDKException $e) {
-            dd($e);
-            // SDK error occurred
-            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+            // return false;
+            // dd($e); // SDK error occurred  echo 'Facebook SDK returned an error: ' . $e->getMessage();
         }
+        return false;
         die();
     }
     public function createCataLog($campaign, $businessId, $accessToken)
@@ -122,7 +123,7 @@ trait FaceBookSdkTraits
 
         try {
             // Make the API call to retrieve batches of products
-            $response = $fbObject->get('/'.$batchId.'/products', $accessToken);
+            $response = $fbObject->get('/' . $batchId . '/products', $accessToken);
             $graphEdge = $response->getGraphEdge();
             // Process the products
             $arrayProduct = [];
@@ -164,7 +165,7 @@ trait FaceBookSdkTraits
         }
     }
 
-    public function replyToComment( $fbObject, $accessToken , $postId , $commentId , $senderId , $pageId)
+    public function replyToComment($fbObject, $accessToken, $postId, $commentId, $senderId, $pageId, $message)
     {
         // $response = $this->fb->post(
         //     '/'.$commentId.'/comments',
@@ -174,27 +175,57 @@ trait FaceBookSdkTraits
         //   $graphNode = $response->getGraphNode();
         //   echo 'Reply ID: ' . $graphNode['id'];
 
-          $fbObject->setDefaultAccessToken($accessToken);
+        $fbObject->setDefaultAccessToken($accessToken);
         try {
-            if($senderId){
-                $message = "Your reply message here Inbox here.";
+            if ($senderId) {
+                // $message = "Your reply message here Inbox here.";
                 // Send a message to the sender's inbox
-                $response = $fbObject->post("/".$pageId."/messages",
-                array('recipient' => ['comment_id'=>$postId , 'post_id'=>$commentId],'message' => $message ),
-                $accessToken);
+                $response = $fbObject->post(
+                    "/" . $pageId . "/messages",
+                    array('recipient' => ['comment_id' => $postId], 'message' => $message),
+                    $accessToken
+                );
 
                 // Check if the message was sent successfully
                 $message_id = $response->getGraphNode()->getField('message_id');
                 if ($message_id) {
+                    return true;
                     echo "Message sent successfully!";
                 } else {
+                    return false;
                     echo "Failed to send message.";
                 }
             }
-
+            return false;
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            // dd($e);
+            // return false;
             echo 'Graph returned an error: ' . $e->getMessage();
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            // dd($e);
+            // return false;
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+    }
+
+    public function commentReply($fbObject, $accessToken, $postId, $commentId, $senderId, $pageId, $replyMessage)
+    {
+        $fbObject->setDefaultAccessToken($accessToken);
+        try {
+            $response = $fbObject->post('/' . $commentId . '/comments', ['message' => $replyMessage]);
+            $message_id = $response->getGraphNode()->getField('id');
+            if ($message_id) {
+                return $message_id;
+                echo "Message sent successfully!";
+            } else {
+                return false;
+                echo "Failed to send message.";
+            }
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            return false;
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            return false;
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
         }
     }

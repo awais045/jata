@@ -266,7 +266,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::post('webhook_comment_reply', 'CommentReplyWebhookController@handleWebhook');
+// Route::get('webhook_comment_reply', 'CommentReplyWebhookController@handleWebhook');
 
 
 Route::middleware('auth.redirect')->group(function () {
@@ -287,6 +287,8 @@ Route::middleware('auth.redirect')->group(function () {
     Route::post('assign/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'assign'])->name('assignment.assign');
 
     Route::get('run_cmd/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'runArtisanCommand'])->name('assignment.runArtisanCommand');
+
+    Route::get('long_token_management', ['App\Http\Controllers\TokenManagementController', 'generateLongToken'])->name('tokenManagement.generateLongToken');
 
     // Route::get('addCataLog', ['App\Http\Controllers\ProductCatalogController', 'index'])->name('catalog.index');
     // Route::get('getBatches', ['App\Http\Controllers\ProductCatalogController', 'getBatches'])->name('catalog.getBatches');

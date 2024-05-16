@@ -46,8 +46,9 @@ class CommentReplyWebhookController extends Controller
     public function handleWebhook(Request $request)
     {
         // Verify the request if needed (e.g., validate the signature)
-
+//EAAUpognFdwcBO9pO4D4NXhIbMsQpS0Vl55M5P1u1viW5dZB8avy9c8ZCGjq09bTFZBEuInssI5dVflFVoMc7LQudZBZAhdif3ZC0NWZCd6x3Hd3hZA7I73dDUePpoy7fqTOsCvchwSGU3ADA44HlYPyuFR6NE5ULZBtcZCUNouXvzIWZCkyUSV0S5dv9Fg9QboK98mxjShPqYxy0tI2agcn
         // Process the webhook data
+        //137873971954043
         $payload = $request->all();
         \Log::info('Webhook Received', ['payload' => $payload]);
         // Verify the webhook token to ensure it's a valid request from Facebook
@@ -68,24 +69,24 @@ class CommentReplyWebhookController extends Controller
         $input = json_decode(file_get_contents('php://input'), true);
 
         // Loop through each entry (should contain only one entry)
-        foreach ($input['entry'] as $entry) {
-            // Loop through each messaging event
-            foreach ($entry['changes'] as $change) {
-                // Check if the change is a comment on a post
-                if ($change['field'] === 'comments' && isset($change['value']['item']) && $change['value']['item'] === 'comment') {
-                    // Extract the comment ID and commenter ID
-                    $comment_id = $change['value']['comment_id'];
-                    $commenter_id = $change['value']['from']['id'];
+        // foreach ($input['entry'] as $entry) {
+        //     // Loop through each messaging event
+        //     foreach ($entry['changes'] as $change) {
+        //         // Check if the change is a comment on a post
+        //         if ($change['field'] === 'comments' && isset($change['value']['item']) && $change['value']['item'] === 'comment') {
+        //             // Extract the comment ID and commenter ID
+        //             $comment_id = $change['value']['comment_id'];
+        //             $commenter_id = $change['value']['from']['id'];
 
-                    // Send auto-reply message to commenter
-                    $this->sendAutoReplyMessage($commenter_id);
-                }
-            }
-        }
+        //             // Send auto-reply message to commenter
+        //             $this->sendAutoReplyMessage($commenter_id);
+        //         }
+        //     }
+        // }
 
 
         // Return a response
-        return response()->json(['message' => 'Webhook received'], 200);
+        // return response()->json(['message' => 'Webhook received'], 200);
     }
 
     public function sendAutoReplyMessage($recipient_id)

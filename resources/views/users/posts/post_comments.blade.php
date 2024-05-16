@@ -82,7 +82,11 @@
                                             <p>Unsupported file type</p>
                                         @endif
                                     @else
-                                        <img src="{{ $campaign->post->live_image_url }}" style="max-width: 55% !important;" class="w-100 post-media">
+                                        @if (isset($campaign->post->live_image_url))
+                                            <img src="{{ $campaign->post->live_image_url }}" style="max-width: 55% !important;" class="w-100 post-media">
+                                        @else
+                                        <img src="#" style="max-width: 55% !important;" class="w-100 post-media">
+                                        @endif
                                     @endif
 
 

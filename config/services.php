@@ -20,10 +20,15 @@ return [
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
         'scheme' => 'https',
     ],
+    // 'facebook' => [
+    //     'client_id' => env('FACEBOOK_CLIENT_ID'),
+    //     'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+    //     'redirect' => env('FACEBOOK_REDIRECT_URI')
+    // ],
     'facebook' => [
-        'client_id' => env('FACEBOOK_CLIENT_ID'),
-        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('FACEBOOK_REDIRECT_URI')
+        'client_id' => env('FACEBOOK_APP_ID'),
+        'client_secret' => env('FACEBOOK_APP_SECRET'), // Add this to your .env file as well
+        'redirect' => env('FACEBOOK_REDIRECT'), // Add this to your .env file as well
     ],
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

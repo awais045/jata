@@ -58,7 +58,6 @@ class FetchPostComments extends Command
             $postsComments = $this->getComments($this->fbNew, $this->accessToken, $post->post_id);
             if ($postsComments) {
                 foreach ($postsComments as $comment) {
-
                     // if($comment['id'] =='405424445528187_384964994509897'){
                     //     dd($comment);
                     // }
