@@ -21,3 +21,5 @@ public/jjj/fb/vendor/
 *.mp4
 public/uploads/
 public/Messenger.zip
+public/messenger/.angular/
+public/messenger/node_modules/
