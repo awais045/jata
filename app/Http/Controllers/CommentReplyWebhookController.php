@@ -32,12 +32,14 @@ class CommentReplyWebhookController extends Controller
             'app_secret' => env('FACEBOOK_APP_SECRET'),
             'default_graph_version' => 'v12.0',
         ]);
-        $this->accessToken = env('ACCESS_TOKEN');
-        $this->businessId = env('BUSINESS_ID');
-        $this->pageID = env('PAGE_ID');
 
         $this->middleware(function ($request, $next) use ($fb) {
-            $fb->setDefaultAccessToken(env('ACCESS_TOKEN'));
+            $this->accessToken = $this->getSessionToken();
+
+            $this->pageID = $this->getPageID();
+            $this->businessId = env('BUSINESS_ID');
+
+            $fb->setDefaultAccessToken($this->accessToken);
             $this->api = $fb;
             return $next($request);
         });

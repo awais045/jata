@@ -31,9 +31,14 @@ class ProductController extends Controller
     public function __construct()
     {
         $this->fb = new Facebook(config('facebook'));
-        $this->accessToken = env('ACCESS_TOKEN');
-        $this->businessId = env('BUSINESS_ID');
-        $this->pageID = env('PAGE_ID');
+        // $this->accessToken = env('ACCESS_TOKEN');
+        // $this->businessId = env('BUSINESS_ID');
+        // $this->pageID = env('PAGE_ID');
+        $this->middleware(function ($request, $next)  {
+            $this->accessToken = $this->getSessionToken();
+            $this->pageID = $this->getPageID();
+            return $next($request);
+        });
     }
     /**
      * Display a listing of the resource.

@@ -289,6 +289,7 @@ Route::middleware('auth.redirect')->group(function () {
     Route::get('run_cmd/{campaign_id}', ['App\Http\Controllers\AssignmentController', 'runArtisanCommand'])->name('assignment.runArtisanCommand');
 
     Route::get('long_token_management', ['App\Http\Controllers\TokenManagementController', 'generateLongToken'])->name('tokenManagement.generateLongToken');
+    Route::post('save_selected_page_token', ['App\Http\Controllers\TokenManagementController', 'save_selected_page_token'])->name('tokenManagement.save_selected_page_token');
 
     // Route::get('addCataLog', ['App\Http\Controllers\ProductCatalogController', 'index'])->name('catalog.index');
     // Route::get('getBatches', ['App\Http\Controllers\ProductCatalogController', 'getBatches'])->name('catalog.getBatches');

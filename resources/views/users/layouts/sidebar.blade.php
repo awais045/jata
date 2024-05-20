@@ -1,5 +1,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <!-- Page content -->
+
+@php
+$pages = \App\Models\Pages::where(['user_id' => Auth::user()->id])->pluck('page_name','id');
+$user_page_selected = session('user_page_selected'); // Using session() helper
+$user_page_selected = Session::get('user_page_selected'); // Using Session facade
+@endphp
+
 <div class="page-content">
     <!-- Main sidebar -->
     <div class="sidebar sidebar-dark sidebar-main sidebar-expand-md" style="background: #2E3238;
@@ -27,6 +34,26 @@
                             <img src="{{url('user/image/admin_logo.png')}}" style="width:70%">
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- /user menu -->
+
+             <!-- User menu -->
+             <div class="sidebar-user">
+                <div class="card-body">
+                    <ul class="nav nav-sidebar" data-nav-type="accordion">
+                        <!-- Main -->
+                        <li class="nav-item">
+                            <select name="user_selected_page" id="user_selected_page" class="form-control select2">
+                                <option value="">Select Page</option>
+                                @if ($pages)
+                                    @foreach ($pages as $k =>$page)
+                                        <option value="{{$k}}" {{ $user_page_selected == $k ? 'selected' : '' }}>{{$page}}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <!-- /user menu -->
@@ -170,3 +197,29 @@
 
 
 
+    <script>
+        $(document).ready(function(){
+            $('#user_selected_page').change(function(){
+                // Get selected value
+                var selectedValue = $(this).val();
+                // alert(selectedValue);
+                // Send AJAX request
+                $.ajax({
+                    url: '{{ url("save_selected_page_token") }}',
+                    type: 'POST',
+                    data: {
+                        selectedValue: selectedValue,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response){
+                        // Handle success response
+                        console.log(response);
+                    },
+                    error: function(xhr){
+                        // Handle error
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+        });
+        </script>

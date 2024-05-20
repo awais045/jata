@@ -18,12 +18,17 @@ class AssignmentController extends Controller
     protected $accessToken;
     protected $businessId;
     protected $pageID;
-    public function __construct()
+    public function __construct(Facebook $fb)
     {
         $this->fb = new Facebook(config('facebook'));
-        $this->accessToken = env('ACCESS_TOKEN');
         $this->businessId = env('BUSINESS_ID');
-        $this->pageID = env('PAGE_ID');
+
+        $this->middleware(function ($request, $next) use ($fb) {
+            $this->accessToken = $this->getSessionToken();
+            $this->pageID = $this->getPageID();
+            $fb->setDefaultAccessToken($this->accessToken);
+            return $next($request);
+        });
     }
     public function showModal($campaign_id)
     {

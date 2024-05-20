@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 public/jjj/fb/vendor/
 *.mp4
+public/uploads/
+public/Messenger.zip

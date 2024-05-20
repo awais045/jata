@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Artisan;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use DB;
+use Illuminate\Support\Facades\Session;
 
 class TokenManagementController extends Controller
 {
@@ -32,8 +33,19 @@ class TokenManagementController extends Controller
         $this->businessId = env('BUSINESS_ID');
         $this->pageID = env('PAGE_ID');
     }
+
+    public function save_selected_page_token(Request $request){
+
+        $selectedValue = $request->selectedValue;
+        session(['user_page_selected' => $selectedValue]);
+        Session::put('user_page_selected', $selectedValue);
+
+    }
+
     public function generateLongToken(Request $request)
     {
+        dd($this->getBusinessID(''));
+        exit;
         if (empty(Auth::user()->long_access_token) || Auth::user()->long_token == 'N') {
             $short_time_access_token = Auth::user()->short_time_access_token;
             $returnToken = $this->getLongLiveToken($short_time_access_token);
@@ -50,14 +62,30 @@ class TokenManagementController extends Controller
             ]);
         } else {
             $this->getPages(Auth::user()->long_access_token);
-            sleep(10);
         }
-        $this->getPostComments();
-        sleep(10);
+        sleep(5);
         $this->getPagesPosts();
-        sleep(10);
+        sleep(5);
+        $this->getPostComments();
+        sleep(5);
     }
-
+    public function getBusinessID($accessToken) {
+        try {
+            // Use the page ID to retrieve business info
+            $response = $this->fb->get("/".$this->pageID."?fields=business", "EAARR7LQi878BO5YA4NYaH799zCJZAR83lAtlLf6ZCJDbXcHXpx6hGhulOpu3vkgZCAf8S1qWaCGtVHlasEQYvVqGEGBSbBIEeecbxGgvI7fqtGz8wStzB3FIkpfG1YGxcyNmvndM7I4sXuunDIdr1nc9DDuOiohBxIkJW5sKk6SA77CL2cV1uUFp8xTEFk3");
+            $business = $response->getGraphNode();
+            $businessId = $business->getField('business')['id'];
+            dd($businessId);
+            echo "Business ID: $businessId";
+        } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+            // Handle API errors
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+            // Handle SDK errors
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+        exit;
+    }
     public function getPages($accessToken)
     {
         if (Auth::user()->pages_get) {
@@ -107,9 +135,11 @@ class TokenManagementController extends Controller
             $response = $this->fb->get('/' . $pageId . '?fields=access_token', $longAccessTokenUser);
             $pageAccessToken = $response->getGraphNode()->getField('access_token');
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            dd($e);
             return false;
             echo 'Graph returned an error: ' . $e->getMessage();
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            dd($e);
             return false;
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
         }
@@ -222,4 +252,7 @@ class TokenManagementController extends Controller
 
         }
     }
+
+
+
 }

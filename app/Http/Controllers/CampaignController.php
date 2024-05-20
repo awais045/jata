@@ -13,6 +13,7 @@ use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Facebook;
 use Facebook\Exceptions\FacebookSDKException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class CampaignController extends Controller
 {
@@ -20,23 +21,24 @@ class CampaignController extends Controller
     private $api;
     protected $fb;
     protected $fbNew;
+    protected $fbLatest;
     protected $accessToken;
     protected $businessId;
     protected $pageID;
+
     public function __construct(Facebook $fb)
     {
         $this->fb = new Facebook(config('facebook'));
-        $this->fbNew = new Facebook([
+        $this->fbLatest = new Facebook([
             'app_id' => env('FACEBOOK_APP_ID'),
             'app_secret' => env('FACEBOOK_APP_SECRET'),
-            'default_graph_version' => 'v12.0',
+            'default_graph_version' => 'v19.0',
         ]);
-        $this->accessToken = env('ACCESS_TOKEN');
         $this->businessId = env('BUSINESS_ID');
-        $this->pageID = env('PAGE_ID');
-
         $this->middleware(function ($request, $next) use ($fb) {
-            $fb->setDefaultAccessToken(env('ACCESS_TOKEN'));
+            $this->accessToken = $this->getSessionToken();
+            $this->pageID = $this->getPageID();
+            $fb->setDefaultAccessToken($this->accessToken);
             $this->api = $fb;
             return $next($request);
         });
@@ -148,7 +150,7 @@ class CampaignController extends Controller
             'image' => $filePath
         ]);
         $fb = new Facebook(config('facebook'));
-        $accessToken = env('ACCESS_TOKEN');
+        $accessToken = $this->accessToken;
         $imageData = [
             // 'source' => $filePath,
             // 'url' => 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU',
@@ -156,7 +158,7 @@ class CampaignController extends Controller
             'url' => $filePath,
             'caption' => $request->campaign_name,
         ];
-        $page_id = env('PAGE_ID');
+        $page_id = $this->pageID;
         try {
             $imageExtensions = [
                 'jpg',
@@ -175,8 +177,10 @@ class CampaignController extends Controller
                 $postId = $graphNode->getField('post_id');
                 FaceBookPost::insert([
                     'user_id' => Auth::user()->id,
-                    'post_id' => $postId,
-                    'graph_node_id' => $graph_node_id,
+                    // 'post_id' => $postId,
+                    // 'graph_node_id' => $graph_node_id,
+                    'graph_node_id' => $postId,
+                    'post_id' => $graph_node_id,
                     'image' => $filePath,
                     'details' => $request->campaign_name,
                     'extension' => $extension,
@@ -219,16 +223,19 @@ class CampaignController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             }
-            return true;
+            return response()->json(['success' => 'Created post: ' ], 200);
             // return back()->with('success', 'Post has been Uploaded successfully.');
         } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            dd( 'Graph API error: ' . $e);
             // Graph API returned an error
             return response()->json(['error' => 'Graph API error: ' . $e->getMessage()], 500);
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            dd('Facebook SDK error: '.$e);
             // SDK returned an error
             return response()->json(['error' => 'Facebook SDK error: ' . $e->getMessage()], 500);
         } catch (\Exception $e) {
             // Other unexpected errors
+            dd($e);
             return response()->json(['error' => 'Unexpected error: ' . $e . $e->getLine()], 500);
         }
     }
@@ -244,6 +251,53 @@ class CampaignController extends Controller
 
     public function testFunction()
     {
+        $cataLogId = 762120629346460;
+        $products_data = $this->fbLatest->get("/" . $cataLogId . "/products", $this->accessToken);
+        $products = $products_data->getGraphEdge()->asArray();
+        $product_item_ids = [];
+        foreach ($products as $product) {
+            $product_item_ids[] = $product['id'];
+        }
+        // Create live video broadcast
+        try {
+            $response = $this->fbLatest->post("/" . $this->pageID . "/live_videos", [
+                'access_token' => $this->accessToken,
+                'status' => 'LIVE_NOW',
+                'title' => 'testtsss',
+                'description' => 'asdsadasdadasdadadad',
+                'product_items' => array('25252395334406077'),
+                // 'product_items' => [7262487020536604]
+                // [
+                //         array(
+                //             'id' => "7262487020536604",
+                //             'retailer_id' => "7262487020536604",
+                //             'product_id' => "7262487020536604",
+                //             'position' => array(
+                //                 'x' => 0.1,
+                //                 'y' => 0.1
+                //             ),
+                //             'start_time_offset_ms' => 0,
+                //             'end_time_offset_ms' => 60000
+                //         ),
+                // ]
+            ]);
+
+            $graphNode = $response->getGraphNode();
+            $stream_url = $graphNode->getField('stream_url');
+            $streamID = $graphNode->getField('id');
+
+            dd($graphNode , $stream_url);
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            dd($e);
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            dd($e);
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
+
+        dd('gete');
+        die();
+        exit;
         $fb = new Facebook([
             'app_id' => env('FACEBOOK_APP_ID'),
             'app_secret' => env('FACEBOOK_APP_SECRET'),
@@ -343,7 +397,6 @@ class CampaignController extends Controller
     }
 
 
-
     public function liveVideoStreamWithCataLog(Request $request)
     {
         $request->validate([
@@ -380,6 +433,7 @@ class CampaignController extends Controller
             $cataLogId = $campaign->catalog_id;
         } else {
             $cataLogId = $this->createCataLog($campaign, $this->businessId, $this->accessToken);
+            dd($cataLogId , $this->accessToken);
         }
         if ($products) {
 

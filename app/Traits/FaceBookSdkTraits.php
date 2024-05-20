@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Campaign;
+use App\Models\Pages;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Auth;
@@ -24,9 +25,32 @@ use FacebookAds\Object\Fields\ProductFeedScheduleFields;
 use FacebookAds\Logger\CurlLogger;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Session;
 
 trait FaceBookSdkTraits
 {
+    function getSessionToken(){
+        $user_page_selected = session('user_page_selected'); // Using session() helper
+        if(empty($user_page_selected)){
+            $user_page_selected = Session::get('user_page_selected'); // Using Session facade
+        }
+        $long_token = Pages::where('id' , $user_page_selected)->whereNotNull('long_page_access_token')->select('long_page_access_token')->first();
+        if($long_token){
+            return $long_token->long_page_access_token;
+        }
+        return false;
+    }
+    function getPageID(){
+        $user_page_selected = session('user_page_selected'); // Using session() helper
+        if(empty($user_page_selected)){
+            $user_page_selected = Session::get('user_page_selected'); // Using Session facade
+        }
+        $long_token = Pages::where('id' , $user_page_selected)->whereNotNull('page_id')->select('page_id')->first();
+        if($long_token){
+            return $long_token->page_id;
+        }
+        return false;
+    }
     function getLongLiveToken($shortToken)
     {
         // if(empty($shortToken)){
