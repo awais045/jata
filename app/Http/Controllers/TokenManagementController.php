@@ -38,14 +38,14 @@ class TokenManagementController extends Controller
 
         $selectedValue = $request->selectedValue;
         session(['user_page_selected' => $selectedValue]);
-        Session::put('user_page_selected', $selectedValue);
-
+        $saveToken = Session::put('user_page_selected', $selectedValue);
+        if($saveToken){
+            echo "1";
+        }
     }
 
     public function generateLongToken(Request $request)
     {
-        dd($this->getBusinessID(''));
-        exit;
         if (empty(Auth::user()->long_access_token) || Auth::user()->long_token == 'N') {
             $short_time_access_token = Auth::user()->short_time_access_token;
             $returnToken = $this->getLongLiveToken($short_time_access_token);
@@ -72,7 +72,7 @@ class TokenManagementController extends Controller
     public function getBusinessID($accessToken) {
         try {
             // Use the page ID to retrieve business info
-            $response = $this->fb->get("/".$this->pageID."?fields=business", "EAARR7LQi878BO5YA4NYaH799zCJZAR83lAtlLf6ZCJDbXcHXpx6hGhulOpu3vkgZCAf8S1qWaCGtVHlasEQYvVqGEGBSbBIEeecbxGgvI7fqtGz8wStzB3FIkpfG1YGxcyNmvndM7I4sXuunDIdr1nc9DDuOiohBxIkJW5sKk6SA77CL2cV1uUFp8xTEFk3");
+            $response = $this->fb->get("/".$this->pageID."?fields=business", "EAARR7LQi878BOxsvKDmw74EB6OurBgOav90kwxgDfjzLSss19N2aoPlFZBvjmSGc9sSyY9voSjPZAwdL0Xvom7tMUMoIvf9Cgdr4j7NyiY4F2PKogRzeImhzoTxhNYN9AhnwNzYtPZAnZBxJ638nnVwSeOP56GYGYmxceJif88tqWuhMei6ZBQv786A2dNYED");
             $business = $response->getGraphNode();
             $businessId = $business->getField('business')['id'];
             dd($businessId);

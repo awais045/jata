@@ -37,6 +37,9 @@ class CampaignController extends Controller
         $this->businessId = env('BUSINESS_ID');
         $this->middleware(function ($request, $next) use ($fb) {
             $this->accessToken = $this->getSessionToken();
+            if(empty($this->accessToken)){
+                return redirect('select_page_first');
+            }
             $this->pageID = $this->getPageID();
             $fb->setDefaultAccessToken($this->accessToken);
             $this->api = $fb;
@@ -48,7 +51,7 @@ class CampaignController extends Controller
      */
     public function index()
     {
-        $campaigns = Campaign::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(10);
+        $campaigns = Campaign::where('user_id', Auth::user()->id)->where('page_id',$this->getSessionPageID()) ->orderBy('id', 'desc')->paginate(10);
         return view('users.campaigns.index', ['campaigns' => $campaigns]);
     }
 
@@ -123,7 +126,7 @@ class CampaignController extends Controller
     }
     public function postListing(Request $request)
     {
-        $posts = FaceBookPost::where('user_id', Auth::user()->id)->orderBy('type')->orderBy('id', 'desc')->get();
+        $posts = FaceBookPost::where('user_id', Auth::user()->id)->where('page_id',$this->getSessionPageID())->orderBy('type')->orderBy('id', 'desc')->get();
         return view('users.post-templates', compact('posts'));
     }
 
@@ -147,13 +150,14 @@ class CampaignController extends Controller
             $filePath = url('uploads/' . $fileName);
         }
         Campaign::where('id', $campaign_id)->update([
-            'image' => $filePath
+            'image' => $filePath,
+            'page_id'=> $this->getSessionPageID()
         ]);
         $fb = new Facebook(config('facebook'));
         $accessToken = $this->accessToken;
         $imageData = [
             // 'source' => $filePath,
-            // 'url' => 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU',
+            // 'url' => 'https://img1.hscicdn.com/image/upload/f_auto,t_ds_w_1280,q_80/lsci/db/PICTURES/CMS/379500/379521.jpg',
             // 'url' => url('uploads/').$fileName,
             'url' => $filePath,
             'caption' => $request->campaign_name,
@@ -186,6 +190,7 @@ class CampaignController extends Controller
                     'extension' => $extension,
                     'campaign_id' => $campaign_id,
                     'created_at' => date('Y-m-d H:i:s'),
+                    'page_id'=> $this->getSessionPageID()
                 ]);
             }
 
@@ -221,6 +226,7 @@ class CampaignController extends Controller
                     'extension' => $extension,
                     'campaign_id' => $campaign_id,
                     'created_at' => date('Y-m-d H:i:s'),
+                    'page_id'=> $this->getSessionPageID()
                 ]);
             }
             return response()->json(['success' => 'Created post: ' ], 200);
@@ -246,6 +252,123 @@ class CampaignController extends Controller
         $products = Product::where('user_id', Auth::user()->id)->get();
         $campaign = new Campaign();
         return view('users.campaigns.createLive', compact('campaign', 'products'));
+    }
+
+    public function liveVideoStreamWithCataLog(Request $request)
+    {
+        $request->validate([
+            'products.*' => 'required',
+            'name' => 'required|string|max:255',
+            'campaign_name' => 'required|string|max:255',
+            'campaign_time' => 'required|string|max:255',
+            'social_type' => 'required|string|max:255',
+            'fil' => 'nullable|string',
+            'file' => 'required|file|mimes:mp4',
+        ]);
+        $newRecord = Campaign::create($request->all());
+        $campaign_id = $newRecord->id;
+        $result = $this->liveVideoUpload($request, $campaign_id);
+        return back()
+            ->with('success', 'Live Video Campaign has been created successfully.');
+    }
+
+    public function liveVideoUpload($request, string $campaign_id)
+    {
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $fileName);
+            $filePath = url('uploads/' . $fileName);
+        }
+        // dd($filePath);
+        $user_id = Auth::user()->id;
+        $products = $request->products;
+        $campaign = Campaign::find($campaign_id);
+        // if ($campaign->catalog_id) {
+        //     $cataLogId = $campaign->catalog_id;
+        // } else {
+        //     $cataLogId = $this->createCataLog($campaign, $this->businessId, $this->accessToken);
+        //     dd($cataLogId , $this->accessToken);
+        // }
+        if ($products) {
+
+            // Campaign::where('id', $campaign_id)->update([
+            //     'catalog_id' => $cataLogId
+            // ]);
+
+            foreach ($products as $product_id) {
+
+                // $result = [];
+                // if ($product_id) {
+                //     $productDetails = Product::find($product_id);
+                //     $result = $this->createFBProductForCatalogId($productDetails, $cataLogId, Auth::user()->id, $this->fb, $this->accessToken);
+                // }
+                CampaignProductAssignment::create([
+                    'user_id' => $user_id,
+                    'product_id' => $product_id,
+                    'campaign_id' => $campaign_id,
+                    // 'result' => json_encode($result)
+                ]);
+            }
+        }
+
+        // sleep(7);
+        // $products_data = $this->fbNew->get("/" . $cataLogId . "/products", $this->accessToken);
+        // $products = $products_data->getGraphEdge()->asArray();
+        // // Create a list of product item IDs
+        // $product_item_ids = [];
+        // if (isset($products['data'])) {
+        //     foreach ($products['data'] as $product) {
+        //         $product_item_ids[] = $product['id'];
+        //     }
+        // }
+
+        try {
+            $response = $this->fb->post("/" . $this->pageID . "/live_videos", [
+                'access_token' => $this->accessToken,
+                'status' => 'LIVE_NOW',
+                'title' => $campaign->name,
+                'description' => $campaign->campaign_name,
+                // 'product_items'=>$product_item_ids,
+                'source' => $this->fb->videoToUpload('uploads/' . $fileName),
+                // 'source'=>$filePath,
+            ]);
+
+            $graphNode = $response->getGraphNode();
+            $stream_url = $graphNode->getField('stream_url');
+            $streamID = $graphNode->getField('id');
+            if ($stream_url) {
+                // echo "Live video stream started successfully.<br>";
+                // echo "Stream URL: {$stream_url}<br>";
+                Campaign::where('id', $campaign_id)->update([
+                    'image' => $filePath,
+                    'streamID' => $streamID,
+                    'stream_url' => $stream_url,
+                    'page_id'=> $this->getSessionPageID()
+                    // 'product_item_ids' => json_encode($product_item_ids)
+                ]);
+
+                FaceBookPost::insert([
+                    'user_id' => Auth::user()->id,
+                    'post_id' => $streamID,
+                    'graph_node_id' => $stream_url,
+                    'image' => $filePath,
+                    'details' => $campaign->campaign_name,
+                    'extension' => $extension,
+                    'campaign_id' => $campaign_id,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            } else {
+            }
+            return true;
+        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+            dd($this->pageID,  $this->accessToken , $e);
+            echo 'Graph returned an error: ' . $e->getMessage();
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            dd($this->pageID,  $this->accessToken , $e);
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+        }
     }
 
 
@@ -394,121 +517,5 @@ class CampaignController extends Controller
         // exit;
 
 
-    }
-
-
-    public function liveVideoStreamWithCataLog(Request $request)
-    {
-        $request->validate([
-            'products.*' => 'required',
-            'name' => 'required|string|max:255',
-            'campaign_name' => 'required|string|max:255',
-            'campaign_time' => 'required|string|max:255',
-            'social_type' => 'required|string|max:255',
-            'fil' => 'nullable|string',
-            'file' => 'required|file|mimes:mp4',
-        ]);
-        $newRecord = Campaign::create($request->all());
-        $campaign_id = $newRecord->id;
-        $this->liveVideoUpload($request, $campaign_id);
-
-        return back()
-            ->with('success', 'Live Video Campaign has been created successfully.');
-    }
-
-    public function liveVideoUpload($request, string $campaign_id)
-    {
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $fileName);
-            $filePath = url('uploads/' . $fileName);
-        }
-        // dd($filePath);
-        $user_id = Auth::user()->id;
-        $products = $request->products;
-        $campaign = Campaign::find($campaign_id);
-        if ($campaign->catalog_id) {
-            $cataLogId = $campaign->catalog_id;
-        } else {
-            $cataLogId = $this->createCataLog($campaign, $this->businessId, $this->accessToken);
-            dd($cataLogId , $this->accessToken);
-        }
-        if ($products) {
-
-            Campaign::where('id', $campaign_id)->update([
-                'catalog_id' => $cataLogId
-            ]);
-
-            foreach ($products as $product_id) {
-
-                if ($product_id) {
-                    $productDetails = Product::find($product_id);
-                    $result = $this->createFBProductForCatalogId($productDetails, $cataLogId, Auth::user()->id, $this->fb, $this->accessToken);
-                }
-                CampaignProductAssignment::create([
-                    'user_id' => $user_id,
-                    'product_id' => $product_id,
-                    'campaign_id' => $campaign_id,
-                    'result' => json_encode($result)
-                ]);
-            }
-        }
-        sleep(10);
-
-        $products_data = $this->fbNew->get("/" . $cataLogId . "/products", $this->accessToken);
-        $products = $products_data->getGraphEdge()->asArray();
-        // Create a list of product item IDs
-        $product_item_ids = [];
-        if (isset($products['data'])) {
-            foreach ($products['data'] as $product) {
-                $product_item_ids[] = $product['id'];
-            }
-        }
-
-
-        try {
-            $response = $this->fb->post("/" . $this->pageID . "/live_videos", [
-                'access_token' => $this->accessToken,
-                'status' => 'LIVE_NOW',
-                'title' => $campaign->name,
-                'description' => $campaign->campaign_name,
-                // 'product_items'=>$product_item_ids,
-                'source' => $this->fb->videoToUpload('uploads/' . $fileName),
-                // 'source'=>$filePath,
-            ]);
-
-            $graphNode = $response->getGraphNode();
-            $stream_url = $graphNode->getField('stream_url');
-            $streamID = $graphNode->getField('id');
-            if ($stream_url) {
-                echo "Live video stream started successfully.<br>";
-                echo "Stream URL: {$stream_url}<br>";
-                Campaign::where('id', $campaign_id)->update([
-                    'image' => $filePath,
-                    'streamID' => $streamID,
-                    'stream_url' => $stream_url,
-                    'product_item_ids' => json_encode($product_item_ids)
-                ]);
-
-                FaceBookPost::insert([
-                    'user_id' => Auth::user()->id,
-                    'post_id' => $streamID,
-                    'graph_node_id' => $stream_url,
-                    'image' => $filePath,
-                    'details' => $campaign->campaign_name,
-                    'extension' => $extension,
-                    'campaign_id' => $campaign_id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-            } else {
-            }
-            return true;
-        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
-            echo 'Graph returned an error: ' . $e->getMessage();
-        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
-            echo 'Facebook SDK returned an error: ' . $e->getMessage();
-        }
     }
 }

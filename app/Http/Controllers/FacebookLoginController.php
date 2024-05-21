@@ -27,7 +27,6 @@ class FacebookLoginController extends Controller
         $request->session()->put('state',Str::random(40));
         $user = Socialite::driver('facebook')->user();
         $existingUser = User::where('facebook_id', $user->id)->first();
-
         if ($existingUser) {
             // Log in the existing user.
             auth()->login($existingUser, true);

@@ -51,6 +51,13 @@ trait FaceBookSdkTraits
         }
         return false;
     }
+    function getSessionPageID(){
+        $user_page_selected = session('user_page_selected'); // Using session() helper
+        if(empty($user_page_selected)){
+            $user_page_selected = Session::get('user_page_selected'); // Using Session facade
+        }
+        return $user_page_selected;
+    }
     function getLongLiveToken($shortToken)
     {
         // if(empty($shortToken)){

@@ -38,6 +38,9 @@ class LiveStreamController extends Controller
         $this->businessId = env('BUSINESS_ID');
         $this->middleware(function ($request, $next)  {
             $this->accessToken = $this->getSessionToken();
+            if(empty($this->accessToken)){
+                return redirect('select_page_first');
+            }
             $this->pageID = $this->getPageID();
             return $next($request);
         });

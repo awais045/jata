@@ -3,17 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Traits\FaceBookSdkTraits;
 use Illuminate\Http\Request;
 use Auth;
+use Facebook\Facebook;
 
 class CalendarController extends Controller
 {
+    use FaceBookSdkTraits;
+    private $api;
+    protected $fb;
+    protected $fbNew;
+    protected $fbLatest;
+    protected $accessToken;
+    protected $businessId;
+    protected $pageID;
+
+    public function __construct(Facebook $fb)
+    {
+        $this->fb = new Facebook(config('facebook'));
+        $this->fbLatest = new Facebook([
+            'app_id' => env('FACEBOOK_APP_ID'),
+            'app_secret' => env('FACEBOOK_APP_SECRET'),
+            'default_graph_version' => 'v19.0',
+        ]);
+        $this->businessId = env('BUSINESS_ID');
+        $this->middleware(function ($request, $next) use ($fb) {
+            $this->accessToken = $this->getSessionToken();
+            if(!$this->accessToken){
+                return redirect('select_page_first');
+            }
+            $this->pageID = $this->getPageID();
+            $fb->setDefaultAccessToken($this->accessToken);
+            $this->api = $fb;
+            return $next($request);
+        });
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $events = Campaign::where('user_id' ,Auth::user()->id)->get();
+        $events = Campaign::where('user_id' , Auth::user()->id )->get();
         return view('users.calender', ['events' => $events]);
     }
 

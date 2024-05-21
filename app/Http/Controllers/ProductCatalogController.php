@@ -40,6 +40,10 @@ class ProductCatalogController extends Controller
         $this->pageID = env('PAGE_ID');
     }
 
+    public function selectPageFirst()
+    {
+        return view('users.selectPageFirst', ['events' => []]);
+    }
     public function index(){
         dd($this->fb);
     }

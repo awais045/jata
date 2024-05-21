@@ -25,6 +25,9 @@ class AssignmentController extends Controller
 
         $this->middleware(function ($request, $next) use ($fb) {
             $this->accessToken = $this->getSessionToken();
+            if(empty($this->accessToken)){
+                return redirect('select_page_first');
+            }
             $this->pageID = $this->getPageID();
             $fb->setDefaultAccessToken($this->accessToken);
             return $next($request);

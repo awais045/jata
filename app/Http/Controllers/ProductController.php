@@ -25,17 +25,24 @@ class ProductController extends Controller
     use FaceBookSdkTraits;
 
     protected $fb;
+    protected $fbLatest;
     protected $accessToken;
     protected $businessId;
     protected $pageID;
     public function __construct()
     {
         $this->fb = new Facebook(config('facebook'));
-        // $this->accessToken = env('ACCESS_TOKEN');
-        // $this->businessId = env('BUSINESS_ID');
-        // $this->pageID = env('PAGE_ID');
+
+        $this->fbLatest = new Facebook([
+            'app_id' => env('FACEBOOK_APP_ID'),
+            'app_secret' => env('FACEBOOK_APP_SECRET'),
+            'default_graph_version' => 'v5.0',
+        ]);
         $this->middleware(function ($request, $next)  {
             $this->accessToken = $this->getSessionToken();
+            if(empty($this->accessToken)){
+                return redirect('select_page_first');
+            }
             $this->pageID = $this->getPageID();
             return $next($request);
         });
@@ -60,11 +67,33 @@ class ProductController extends Controller
         $product = new Product();
         return view('users.product_catalog.create', compact('product'));
     }
+    // function getBusinessID(){
+    //    $long_access_token =Auth::user()->long_access_token;
+    //     /* PHP SDK v5.0.0 */
+    //     /* make the API call */
+    //     try {
+    //         // Returns a `Facebook\FacebookResponse` object
+    //         $response = $this->fbLatest->get(
+    //         '/'.$this->pageID.'?fields=business',
+    //         $this->accessToken
+    //         );
+    //     } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+    //         echo 'Graph returned an error: ' . $e->getMessage();
+    //         exit;
+    //     } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+    //         echo 'Facebook SDK returned an error: ' . $e->getMessage();
+    //         exit;
+    //     }
+    //     $graphNode = $response->getGraphNode();
+    //     dd($graphNode);
+    //     /* handle the result */
+    // }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+
         // $request->validate([
         //     'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         // ]);
@@ -109,7 +138,6 @@ class ProductController extends Controller
             ->with('success', 'Product has been created successfully.');
         // ->with('image', $imageName);
     }
-
     /**
      * Display the specified resource.
      */

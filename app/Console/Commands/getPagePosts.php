@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\FaceBookPost;
+use App\Models\Pages;
 use App\Traits\FaceBookSdkTraits;
 use Illuminate\Console\Command;
 use Facebook\Facebook;
@@ -41,15 +42,18 @@ class getPagePosts extends Command
             'app_secret' => env('FACEBOOK_APP_SECRET'),
             'default_graph_version' => 'v19.0',
         ]);
-        $this->accessToken = env('ACCESS_TOKEN');
-        $this->businessId = env('BUSINESS_ID');
-        $this->pageID = env('PAGE_ID');
+        // $this->accessToken = env('ACCESS_TOKEN');
+        // $this->businessId = env('BUSINESS_ID');
+        // $this->pageID = env('PAGE_ID');
     }
     /**
      * Execute the console command.
      */
     public function handle()
     {
+
+        $getPagesWithToken = Pages::whereNotNull('long_page_access_token')->pluck('long_page_access_token','page_id');
+
         $posts = $this->getPosts($this->fbNew, $this->accessToken, $this->pageID);
         if ($posts) {
             foreach ($posts as $post) {

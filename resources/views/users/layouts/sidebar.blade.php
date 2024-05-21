@@ -202,6 +202,10 @@ $user_page_selected = Session::get('user_page_selected'); // Using Session facad
             $('#user_selected_page').change(function(){
                 // Get selected value
                 var selectedValue = $(this).val();
+                if(selectedValue==""){
+                    alert("please select the page")
+                    return false;
+                }
                 // alert(selectedValue);
                 // Send AJAX request
                 $.ajax({
@@ -213,6 +217,10 @@ $user_page_selected = Session::get('user_page_selected'); // Using Session facad
                     },
                     success: function(response){
                         // Handle success response
+                        alert("Page Has been selected.")
+                        if(response){
+                            window.location.href ='{{ url("calender") }}';
+                        }
                         console.log(response);
                     },
                     error: function(xhr){

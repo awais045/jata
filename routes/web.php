@@ -271,6 +271,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth.redirect')->group(function () {
     // Routes that require authentication
+    Route::get('select_page_first', ['App\Http\Controllers\ProductCatalogController', 'selectPageFirst'])->name('Calendar.selectPageFirst');
 
     Route::get('campaigns/post-live-video', ['App\Http\Controllers\CampaignController', 'liveVideoCreate'])->name('campaigns.liveVideoCreate');
     Route::post('campaigns/post-live-video-post', ['App\Http\Controllers\CampaignController', 'liveVideoStreamWithCataLog'])->name('campaigns.liveVideoStreamWithCataLog');

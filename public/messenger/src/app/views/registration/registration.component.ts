@@ -67,7 +67,7 @@ export class RegistrationComponent implements OnInit {
     // debugger
     const options: LoginOptions = {
       //scope:'public_profile,email,ads_management,instagram_basic,instagram_branded_content_brand,pages_manage_engagement',
-      scope: 'public_profile,email,read_insights,ads_management,pages_manage_posts,catalog_management,instagram_basic,pages_manage_engagement,pages_messaging,pages_read_user_content,pages_manage_metadata,pages_manage_ads,instagram_manage_comments,instagram_manage_insights,pages_read_engagement',
+      scope: 'public_profile,email,read_insights,ads_management,pages_manage_posts,business_management,catalog_management,instagram_basic,pages_manage_engagement,pages_messaging,pages_read_user_content,pages_manage_metadata,pages_manage_ads,instagram_manage_comments,instagram_manage_insights,pages_read_engagement',
       return_scopes: true,
       enable_profile_selector: true,
     };
