@@ -45,7 +45,10 @@ class CalendarController extends Controller
     public function index()
     {
         $events = Campaign::where('user_id' , Auth::user()->id )->get();
-        return view('users.calender', ['events' => $events]);
+
+        $liveCounts = Campaign::where('social_type', 'live')->where('user_id' , Auth::user()->id )->count();
+        $liveCountsMedia = Campaign::whereNotIn('social_type', ['live'])->where('user_id' , Auth::user()->id )->count();
+        return view('users.calender', ['events' => $events ,'liveCounts'=>$liveCounts,'liveCountsMedia'=>$liveCountsMedia]);
     }
 
     /**

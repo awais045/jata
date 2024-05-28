@@ -52,7 +52,11 @@ class getPagePosts extends Command
     public function handle()
     {
 
+        exit();
         $getPagesWithToken = Pages::whereNotNull('long_page_access_token')->pluck('long_page_access_token','page_id');
+
+
+        $postsComments = FaceBookPost::whereNull('live_image_url')->get();
 
         $posts = $this->getPosts($this->fbNew, $this->accessToken, $this->pageID);
         if ($posts) {
@@ -74,13 +78,13 @@ class getPagePosts extends Command
                     $title = 'No title set';
                 }
                 $arrayToSaveOrUpdate = [
-                    'user_id' => 2,
+                    // 'user_id' => 2,
                     // 'post_id' => $post['attachments']['data'][0]['target']['id'],
                     // 'campaign_id' => 16,
-                    'details' =>$title ,
+                    // 'details' =>$title ,
                     'live_image_url'=>$media_url,
                     'post_url' =>$post['attachments']['data'][0]['url'],
-                    'created_time' => $post['created_time'],
+                    // 'created_time' => $post['created_time'],
                     'type' => $post['attachments']['data'][0]['type'],
                 ];
                 $from_id = isset($post['from']['id']) ? $post['from']['id'] : 'Unknown';

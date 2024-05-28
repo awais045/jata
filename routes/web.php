@@ -15,9 +15,6 @@ Route::get('/homee', function () {
     dd($ff);
 });
 
-// FacebookLoginController redirect and callback urls
-Route::get('/auth/facebook', [FacebookLoginController::class, 'redirectToFacebook'])->name('auth.facebook');
-Route::get('/auth/facebook/callback', [FacebookLoginController::class, 'handleFacebookCallback']);
 
 use App\Http\Controllers\Auth\CustomLoginController;
 use App\Http\Controllers\Auth\CustomRegisterController;
@@ -270,6 +267,12 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth.redirect')->group(function () {
+
+    // FacebookLoginController redirect and callback urls
+    Route::get('/login/facebook', [FacebookLoginController::class, 'redirectToFacebook'])->name('auth.facebook');
+    Route::get('/login/facebook/callback', [FacebookLoginController::class, 'handleFacebookCallback']);
+
+
     // Routes that require authentication
     Route::get('select_page_first', ['App\Http\Controllers\ProductCatalogController', 'selectPageFirst'])->name('Calendar.selectPageFirst');
 

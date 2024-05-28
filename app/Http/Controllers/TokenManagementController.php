@@ -44,25 +44,25 @@ class TokenManagementController extends Controller
         }
     }
 
-    public function generateLongToken(Request $request)
+    public function generateLongToken()
     {
-        if (empty(Auth::user()->long_access_token) || Auth::user()->long_token == 'N') {
-            $short_time_access_token = Auth::user()->short_time_access_token;
-            $returnToken = $this->getLongLiveToken($short_time_access_token);
-            if ($returnToken) {
-                User::where('id', Auth::user()->id)->update([
-                    'long_token' => 'Y',
-                    'long_access_token' => $returnToken
-                ]);
-                sleep(2);
-                return $this->getPages($returnToken);
-            }
+        // if (empty(Auth::user()->long_access_token) || Auth::user()->long_token == 'N') {
+        $short_time_access_token = Auth::user()->short_time_access_token;
+        $returnToken = $this->getLongLiveToken($short_time_access_token);
+        if ($returnToken) {
             User::where('id', Auth::user()->id)->update([
-                'long_token' => 'N'
+                'long_token' => 'Y',
+                'long_access_token' => $returnToken
             ]);
-        } else {
-            $this->getPages(Auth::user()->long_access_token);
+            sleep(2);
+            return $this->getPages($returnToken);
         }
+        User::where('id', Auth::user()->id)->update([
+            'long_token' => 'N'
+        ]);
+        // } else {
+        //     $this->getPages(Auth::user()->long_access_token);
+        // }
         sleep(5);
         $this->getPagesPosts();
         sleep(5);

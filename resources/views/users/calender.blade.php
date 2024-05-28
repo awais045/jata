@@ -80,15 +80,15 @@
                         <div class="col-md-8">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <a href="" class="btn btn-primary mt-3 w-100"><img src="user/image/side_logo10.png"
+                                    <a href="{{url('campaigns/post-live-video')}}" class="btn btn-primary mt-3 w-100"><img src="user/image/side_logo10.png"
                                             style="width: 23px;"> Live salg</a>
                                 </div>
-                                <div class="col-md-4">
-                                    <a href="" class="btn btn-primary mt-3 w-100"><img
+                                {{-- <div class="col-md-4">
+                                    <a href="{{url('campaigns/create')}}" class="btn btn-primary mt-3 w-100"><img
                                             src="website/user/../assets/user/images/tag1.PNG"></i>Kommentar salg</a>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-4">
-                                    <a href="" class="btn btn-info mt-3 w-100"> <img src="user/image/side_logo11.png"
+                                    <a href="{{url('campaigns/create')}}" class="btn btn-info mt-3 w-100"> <img src="user/image/side_logo11.png"
                                             style="width: 20px;"> Nyt medie indhold</a>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@
                                                     <img src="user/image/sale.png" class="w-100">
                                                 </div>
                                                 <div class="col-md-8 col-8">
-                                                    <h3 class="number_heading">155</h3>
+                                                    <h3 class="number_heading">{{$liveCounts}}</h3>
                                                     <p class="number_paragraph">Total Live Salg</p>
                                                 </div>
                                             </div>
@@ -138,7 +138,7 @@
                                                     <img src="user/image/logo_side13.png" class="w-100">
                                                 </div>
                                                 <div class="col-md-8 col-8">
-                                                    <h3 class="number_heading">255</h3>
+                                                    <h3 class="number_heading">{{$liveCountsMedia}}</h3>
                                                     <p class="number_paragraph">Total Media Post</p>
                                                 </div>
                                             </div>
