@@ -18,6 +18,7 @@ Route::get('/homee', function () {
 
 use App\Http\Controllers\Auth\CustomLoginController;
 use App\Http\Controllers\Auth\CustomRegisterController;
+use App\Http\Controllers\FacebookWebhookController;
 
 Route::get('login', [CustomLoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [CustomLoginController::class, 'login']);
@@ -265,6 +266,8 @@ Route::middleware('auth')->group(function () {
 
 // Route::get('webhook_comment_reply', 'CommentReplyWebhookController@handleWebhook');
 
+Route::get('/webhook', [FacebookWebhookController::class, 'verify']);
+Route::post('/webhook', [FacebookWebhookController::class, 'handle']);
 
 Route::middleware('auth.redirect')->group(function () {
 
@@ -275,13 +278,14 @@ Route::middleware('auth.redirect')->group(function () {
 
     // Routes that require authentication
     Route::get('select_page_first', ['App\Http\Controllers\ProductCatalogController', 'selectPageFirst'])->name('Calendar.selectPageFirst');
+    Route::get('select_page_first', ['App\Http\Controllers\ProductCatalogController', 'selectPageFirst'])->name('Calendar.selectPageFirst');
 
     Route::get('campaigns/post-live-video', ['App\Http\Controllers\CampaignController', 'liveVideoCreate'])->name('campaigns.liveVideoCreate');
     Route::post('campaigns/post-live-video-post', ['App\Http\Controllers\CampaignController', 'liveVideoStreamWithCataLog'])->name('campaigns.liveVideoStreamWithCataLog');
 
     Route::get('post-templates', ['App\Http\Controllers\CampaignController', 'postListing'])->name('campaigns.postListing');
     Route::get('campaigns/upload_media/{campaign_id}', ['App\Http\Controllers\CampaignController', 'uploadVideOrImage'])->name('assignment.uploadVideOrImage');
-    Route::post('campaigns/upload_media/{campaign_id}', ['App\Http\Controllers\CampaignController', 'saveUploadVideOrImage'])->name('assignment.uploadVideOrImage');
+    Route::post('campaigns/upload_media/{campaign_id}', ['App\Http\Controllers\CampaignController', 'saveUploadVideOrImage'])->name('assignment.uploadVideOrImagePost');
     Route::resource('campaigns', 'App\Http\Controllers\CampaignController');
 
     Route::resource('product-catalog', 'App\Http\Controllers\ProductController');

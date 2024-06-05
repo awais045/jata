@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('reply:comments')->min();
         $schedule->command('fetch:comments')->min();
         $schedule->command('page:posts')->min();
+        $schedule->command('go:live')->min();
     }
 
     /**

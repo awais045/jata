@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\FaceBookPost;
 use App\Models\FaceBookPostComments;
+use App\Models\Pages;
 use App\Traits\FaceBookSdkTraits;
 use Illuminate\Console\Command;
 use Facebook\Facebook;
@@ -44,7 +45,7 @@ class FetchPostComments extends Command
             'app_secret' => env('FACEBOOK_APP_SECRET'),
             'default_graph_version' => 'v12.0',
         ]);
-        $this->accessToken = env('ACCESS_TOKEN');
+        // $this->accessToken = env('ACCESS_TOKEN');
         $this->businessId = env('BUSINESS_ID');
         $this->pageID = env('PAGE_ID');
     }
@@ -52,10 +53,15 @@ class FetchPostComments extends Command
 
     public function handle()
     {
-        $posts = FaceBookPost::all();
+        $getPagesWithToken = Pages::whereNotNull('long_page_access_token')->pluck('long_page_access_token','id');
+        // $page_id_get = Pages::whereNotNull('long_page_access_token')->pluck('from_id','id');
+
+        $posts = FaceBookPost::whereNotNull('page_id')->get();
         // $posts = FaceBookPost::where('id', 6)->get();
         foreach ($posts as $post) {
-            $postsComments = $this->getComments($this->fbNew, $this->accessToken, $post->post_id);
+            $getToken =$getPagesWithToken[$post->page_id];
+            // $page_id =$page_id_get[$post->page_id];
+            $postsComments = $this->getComments($this->fbNew, $getToken, $post->post_id);
             if ($postsComments) {
                 foreach ($postsComments as $comment) {
                     // if($comment['id'] =='405424445528187_384964994509897'){

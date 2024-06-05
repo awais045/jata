@@ -263,7 +263,7 @@ class CampaignController extends Controller
             'campaign_time' => 'required|string|max:255',
             'social_type' => 'required|string|max:255',
             'fil' => 'nullable|string',
-            'file' => 'required|file|mimes:mp4',
+            // 'file' => 'required|file|mimes:mp4',
         ]);
         $newRecord = Campaign::create($request->all());
         $campaign_id = $newRecord->id;
@@ -274,7 +274,7 @@ class CampaignController extends Controller
 
     public function liveVideoUpload($request, string $campaign_id)
     {
-        if ($request->hasFile('file')) {
+        if ($request->file('file')!=null) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
